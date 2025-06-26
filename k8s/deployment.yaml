@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genomic-api
+  labels:
+    app: genomic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: genomic
+  template:
+    metadata:
+      labels:
+        app: genomic
+    spec:
+      containers:
+        - name: genomic
+          image: genomic-api:latest
+          imagePullPolicy: Never  # Use locally built image
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              value: "postgres"
+            - name: DB_NAME
+              value: "genomics"
