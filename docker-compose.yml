@@ -16,7 +16,7 @@ services:
 
   api:
     build: .
-    container_name: genomic_api
+    container_name: genomic
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: 5432
