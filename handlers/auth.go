@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"genomic/middleware"
+	"github.com/imranfastian/genomic/middleware"
 )
 
 // LoginRequest represents the expected JSON body for login

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"genomic/config"
+	"github.com/imranfastian/genomic/config"
 )
 
 // Genome represents a genome record from the DB

@@ -6,14 +6,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"genomic/config"
-	"genomic/handlers"
-	"genomic/middleware"
+	"github.com/imranfastian/genomic/config"
+	"github.com/imranfastian/genomic/handlers"
+	"github.com/imranfastian/genomic/middleware"
 )
 
 // Prometheus metrics
@@ -84,22 +84,28 @@ func main() {
 	}
 	defer config.CloseDB()
 
-	r := gin.Default()
+	mux := http.NewServeMux()
 
 	// Prometheus metrics endpoint
-	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	mux.Handle("/metrics", promhttp.Handler())
 
 	// Public route
-	r.POST("/login", handlers.LoginHandler)
+	mux.HandleFunc("/login", handlers.LoginHandler)
 
-	// Protected route (example)
-	protected := r.Group("/")
-	protected.Use(middleware.JWTMiddleware)
-	protected.GET("/genomes", handlers.GenomesHandler)
+	// Protected route (uses JWT middleware)
+	mux.HandleFunc("/genomes", middleware.JWTMiddleware(handlers.GenomesHandler))
 
-	// Start server
+	// Server config
+	server := &http.Server{
+		Addr:         ":8080",
+		Handler:      ObservabilityMiddleware(mux),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
 	fmt.Println("Server is running on http://localhost:8080")
-	if err := r.Run(":8080"); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal().Err(err).Msg("Server failed")
 	}
 }
